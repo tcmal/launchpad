@@ -1,0 +1,6 @@
+CREATE TABLE visits (
+	id SERIAL PRIMARY KEY,
+	ip TEXT NOT NULL,
+	useragent TEXT NOT NULL,
+	msg TEXT NOT NULL
+)

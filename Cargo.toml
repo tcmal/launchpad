@@ -1,0 +1,12 @@
+[package]
+name = "rocket-structure"
+version = "0.1.0"
+authors = ["tcmal <oscar.shrimpton.personal@gmail.com>"]
+
+[dependencies]
+rocket = "0.3.6"
+rocket_codegen = "0.3.6"
+diesel = { version = "1.0", features = ["postgres"] }
+r2d2-diesel = "1.0"
+r2d2 = "0.8"
+dotenv = "0.11.0"
