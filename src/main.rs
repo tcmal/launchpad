@@ -1,22 +1,25 @@
 #![feature(plugin)]
 #![plugin(rocket_codegen)]
 
-extern crate rocket;
 #[macro_use]
 extern crate diesel;
 extern crate r2d2;
 extern crate r2d2_diesel;
 extern crate dotenv;
+extern crate rocket;
+extern crate rocket_contrib;
 
 use dotenv::dotenv;
+use diesel::prelude::*;
 
 mod models;
 mod schema;
 pub mod pooling;
+
 use pooling::{init_pool, DbConn};
 use models::{ReqInfo, NewVisit, Visit};
 use schema::visits;
-use diesel::prelude::*;
+
 
 fn add_and_get_visits(conn: DbConn, inf: ReqInfo, msg: &str) -> String {
 	// Make a NewVisit
