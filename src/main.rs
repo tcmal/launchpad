@@ -17,6 +17,7 @@ use std::collections::HashMap;
 use dotenv::dotenv;
 use diesel::prelude::*;
 use rocket_contrib::Template;
+use rocket::response::{Redirect, NamedFile};
 
 mod models;
 mod schema;
@@ -25,7 +26,6 @@ pub mod pooling;
 use pooling::{init_pool, DbConn};
 use models::{ReqInfo, NewVisit, Visit};
 use schema::visits;
-use rocket::response::NamedFile;
 use std::path::{PathBuf, Path};
 
 fn add_and_get_visits(conn: DbConn, inf: ReqInfo, msg: &str) -> Template {
@@ -66,6 +66,14 @@ fn files(file: PathBuf) -> Option<NamedFile> {
     NamedFile::open(Path::new("static/").join(file)).ok()
 }
 
+#[get("/clear")]
+fn clear(conn: DbConn) -> Redirect {
+	diesel::delete(visits::table)
+		.execute(&*conn)
+		.expect("Error deleting posts");
+	
+	Redirect::to("/")
+}
 
 fn main() {
 	// Get the .env values
@@ -75,7 +83,7 @@ fn main() {
 	rocket::ignite()
 		.attach(Template::fairing()) // Templating
 		.manage(init_pool()) // Manage our database connections
-		.mount("/", routes![index, custom_msg])
+		.mount("/", routes![index, clear, custom_msg])
 		.mount("/static/", routes![files])
 		.launch();
 }
