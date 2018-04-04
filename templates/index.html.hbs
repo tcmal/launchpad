@@ -1,0 +1,32 @@
+<html>
+<head>
+	<link rel="stylesheet" href="/static/vendor/bootstrap.min.css">
+</head>
+<body>
+	<div class="container">
+		<h1>Hello, World!</h1>
+		<div class="table-responsive">
+			<table class="table table-hover">
+				<thead class="thead-dark">
+					<tr>
+						<th>IP</th>
+						<th>Useragent</th>
+						<th>Message</th>
+					</tr>
+				</thead>
+				<tbody>
+					{{#each results as |r|}}
+					<tr>
+						<td>{{r.ip}}</td>
+						<td>{{r.useragent}}</td>
+						<td>{{r.msg}}</td>
+					</tr>
+					{{/each~}}
+				</tbody>
+			</table>
+		</div>
+	</div>
+</body>
+</html>
+
+

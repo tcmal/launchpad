@@ -10,8 +10,10 @@ diesel = { version = "1.0", features = ["postgres"] }
 r2d2-diesel = "1.0"
 r2d2 = "0.8"
 dotenv = "0.11.0"
+serde = "1.0"
+serde_derive = "1.0"
 
 [dependencies.rocket_contrib]
 version = "*"
 default-features = false
-features = ["handlebars_templates"]
+features = ["json", "handlebars_templates"]

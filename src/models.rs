@@ -5,7 +5,7 @@ use std::net::SocketAddr;
 use schema::visits;
 
 // Visit
-#[derive(Queryable)]
+#[derive(Queryable, Serialize)] 
 pub struct Visit {
 	pub id: i32,
 	pub ip: String, 

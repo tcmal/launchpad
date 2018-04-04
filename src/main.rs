@@ -1,16 +1,22 @@
 #![feature(plugin)]
 #![plugin(rocket_codegen)]
 
-#[macro_use]
-extern crate diesel;
 extern crate r2d2;
 extern crate r2d2_diesel;
 extern crate dotenv;
 extern crate rocket;
-extern crate rocket_contrib;
 
+#[macro_use]
+extern crate diesel;
+#[macro_use]
+extern crate rocket_contrib;
+#[macro_use]
+extern crate serde_derive;
+
+use std::collections::HashMap;
 use dotenv::dotenv;
 use diesel::prelude::*;
+use rocket_contrib::Template;
 
 mod models;
 mod schema;
@@ -19,9 +25,10 @@ pub mod pooling;
 use pooling::{init_pool, DbConn};
 use models::{ReqInfo, NewVisit, Visit};
 use schema::visits;
+use rocket::response::NamedFile;
+use std::path::{PathBuf, Path};
 
-
-fn add_and_get_visits(conn: DbConn, inf: ReqInfo, msg: &str) -> String {
+fn add_and_get_visits(conn: DbConn, inf: ReqInfo, msg: &str) -> Template {
 	// Make a NewVisit
 	let visit = NewVisit {msg: msg, ip: &inf.ip.to_string(), useragent: &inf.useragent};
 	
@@ -37,24 +44,28 @@ fn add_and_get_visits(conn: DbConn, inf: ReqInfo, msg: &str) -> String {
 		.expect("Error loading visits");
 	
 	results.reverse();
-
+	let mut data = HashMap::new(); 
+	data.insert("results", json!(results));
+	
 	// Display them
-	let mut out = format!("Visits: {}\n", results.len());
-	for post in results {
-		out = format!("{}{} {} {}\n", out, post.msg, post.ip, post.useragent);
-	}
-	out
+	Template::render("index", data)
 }
 
 #[get("/")]
-fn index(conn: DbConn, inf: ReqInfo) -> String {
+fn index(conn: DbConn, inf: ReqInfo) -> Template {
 	add_and_get_visits(conn, inf, "Hello, World!")	
 }
 
 #[get("/<msg>")]
-fn custom_msg(conn: DbConn, inf: ReqInfo, msg: String) -> String {
+fn custom_msg(conn: DbConn, inf: ReqInfo, msg: String) -> Template {
 	add_and_get_visits(conn, inf, &msg)
 }
+
+#[get("/<file..>")]
+fn files(file: PathBuf) -> Option<NamedFile> {
+    NamedFile::open(Path::new("static/").join(file)).ok()
+}
+
 
 fn main() {
 	// Get the .env values
@@ -62,7 +73,9 @@ fn main() {
 
 	// Launch rocket
 	rocket::ignite()
+		.attach(Template::fairing()) // Templating
 		.manage(init_pool()) // Manage our database connections
 		.mount("/", routes![index, custom_msg])
+		.mount("/static/", routes![files])
 		.launch();
 }
